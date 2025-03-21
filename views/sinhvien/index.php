@@ -34,8 +34,15 @@
                     <td><?php echo htmlspecialchars($row['NgaySinh']); ?></td>
                     <td>
                         <?php if ($row['Hinh']): ?>
-                        <img src="<?php echo htmlspecialchars($row['Hinh']); ?>" alt="Hình sinh viên"
-                            style="max-width: 50px;">
+                        <?php
+                                $imagePath = "/Project/buoi7-KT/" . htmlspecialchars($row['Hinh']);
+                                echo "<!-- Debug: Image path = " . $imagePath . " -->";
+                                ?>
+                        <img src="<?php echo $imagePath; ?>" alt="Hình sinh viên"
+                            style="width: 50px; height: 50px; object-fit: cover;">
+                        <?php else: ?>
+                        <img src="/Project/buoi7-KT/uploads/avatar.jpg" alt="Hình mặc định"
+                            style="width: 50px; height: 50px; object-fit: cover;">
                         <?php endif; ?>
                     </td>
                     <td><?php echo htmlspecialchars($row['TenNganh']); ?></td>

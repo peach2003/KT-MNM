@@ -57,9 +57,17 @@ class SinhVienController
                     if (!file_exists($uploadDir)) {
                         mkdir($uploadDir, 0777, true);
                     }
-                    $uploadFile = $uploadDir . basename($_FILES['Hinh']['name']);
+
+                    // Lấy đuôi file từ tên file gốc
+                    $fileInfo = pathinfo($_FILES['Hinh']['name']);
+                    $fileExtension = $fileInfo['extension'];
+
+                    // Tạo tên file mới với đuôi file
+                    $newFileName = uniqid() . '.' . $fileExtension;
+                    $uploadFile = $uploadDir . $newFileName;
+
                     if (move_uploaded_file($_FILES['Hinh']['tmp_name'], $uploadFile)) {
-                        $this->sinhVien->Hinh = 'uploads/' . basename($_FILES['Hinh']['name']);
+                        $this->sinhVien->Hinh = 'uploads/' . $newFileName;
                     }
                 }
 
@@ -109,9 +117,17 @@ class SinhVienController
                     if (!file_exists($uploadDir)) {
                         mkdir($uploadDir, 0777, true);
                     }
-                    $uploadFile = $uploadDir . basename($_FILES['Hinh']['name']);
+
+                    // Lấy đuôi file từ tên file gốc
+                    $fileInfo = pathinfo($_FILES['Hinh']['name']);
+                    $fileExtension = $fileInfo['extension'];
+
+                    // Tạo tên file mới với đuôi file
+                    $newFileName = uniqid() . '.' . $fileExtension;
+                    $uploadFile = $uploadDir . $newFileName;
+
                     if (move_uploaded_file($_FILES['Hinh']['tmp_name'], $uploadFile)) {
-                        $this->sinhVien->Hinh = 'uploads/' . basename($_FILES['Hinh']['name']);
+                        $this->sinhVien->Hinh = 'uploads/' . $newFileName;
                     }
                 } else {
                     $this->sinhVien->Hinh = $_POST['HinhCu'];
