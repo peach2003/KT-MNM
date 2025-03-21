@@ -11,7 +11,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">Quản lý học phần</a>
+            <a class="navbar-brand" href="index.php?controller=sinhvien&action=index">Quản lý sinh viên</a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -25,13 +25,15 @@
                     </li>
                 </ul>
                 <?php if (isset($_SESSION['MaSV'])): ?>
-                    <div class="d-flex">
-                        <a href="index.php?controller=hocphan&action=logout" class="btn btn-outline-light">Đăng xuất</a>
-                    </div>
+                <div class="d-flex">
+                    <span class="text-light me-3">Xin chào,
+                        <?php echo htmlspecialchars($_SESSION['HoTen'] ?? ''); ?></span>
+                    <a href="index.php?controller=hocphan&action=logout" class="btn btn-outline-light">Đăng xuất</a>
+                </div>
                 <?php else: ?>
-                    <div class="d-flex">
-                        <a href="index.php?controller=hocphan&action=login" class="btn btn-outline-light">Đăng nhập</a>
-                    </div>
+                <div class="d-flex">
+                    <a href="index.php?controller=hocphan&action=login" class="btn btn-outline-light">Đăng nhập</a>
+                </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -52,18 +54,18 @@
             </thead>
             <tbody>
                 <?php while ($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($row['MaHP']); ?></td>
-                        <td><?php echo htmlspecialchars($row['TenHP']); ?></td>
-                        <td><?php echo htmlspecialchars($row['SoTinChi']); ?></td>
-                        <td><?php echo htmlspecialchars($row['SoLuong']); ?></td>
-                        <td>
-                            <?php if (isset($_SESSION['MaSV'])): ?>
-                                <a href="index.php?controller=hocphan&action=dangKy&id=<?php echo $row['MaHP']; ?>"
-                                    class="btn btn-success btn-sm">Đăng ký</a>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['MaHP']); ?></td>
+                    <td><?php echo htmlspecialchars($row['TenHP']); ?></td>
+                    <td><?php echo htmlspecialchars($row['SoTinChi']); ?></td>
+                    <td><?php echo htmlspecialchars($row['SoLuong']); ?></td>
+                    <td>
+                        <?php if (isset($_SESSION['MaSV'])): ?>
+                        <a href="index.php?controller=hocphan&action=dangKy&id=<?php echo $row['MaHP']; ?>"
+                            class="btn btn-success btn-sm">Đăng ký</a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>

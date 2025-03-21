@@ -9,6 +9,36 @@
 </head>
 
 <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.php?controller=sinhvien&action=index">Quản lý sinh viên</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.php?controller=sinhvien&action=index">Sinh viên</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?controller=hocphan&action=index">Học Phần</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?controller=hocphan&action=danhSachDangKy">Đăng Kí</a>
+                    </li>
+                </ul>
+                <?php if (isset($_SESSION['MaSV'])): ?>
+                <div class="d-flex">
+                    <span class="text-light me-3">Xin chào,
+                        <?php echo htmlspecialchars($_SESSION['HoTen'] ?? ''); ?></span>
+                    <a href="index.php?controller=hocphan&action=logout" class="btn btn-outline-light">Đăng xuất</a>
+                </div>
+                <?php else: ?>
+                <div class="d-flex">
+                    <a href="index.php?controller=hocphan&action=login" class="btn btn-outline-light">Đăng nhập</a>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </nav>
+
     <div class="container mt-4">
         <h1 class="mb-4">Danh sách sinh viên</h1>
         <a href="index.php?action=create" class="btn btn-primary mb-3">Thêm sinh viên</a>

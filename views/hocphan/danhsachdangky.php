@@ -11,7 +11,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">Quản lý học phần</a>
+            <a class="navbar-brand" href="index.php?controller=sinhvien&action=index">Quản lý học phần</a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -20,8 +20,13 @@
                     <li class="nav-item">
                         <a class="nav-link" href="index.php?controller=hocphan&action=index">Học phần</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php?controller=hocphan&action=danhSachDangKy">Đăng Kí (2)</a>
+                    </li>
                 </ul>
                 <div class="d-flex">
+                    <span class="text-light me-3">Xin chào,
+                        <?php echo htmlspecialchars($_SESSION['HoTen'] ?? ''); ?></span>
                     <a href="index.php?controller=hocphan&action=logout" class="btn btn-outline-light">Đăng xuất</a>
                 </div>
             </div>
