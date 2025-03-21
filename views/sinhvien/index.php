@@ -25,15 +25,15 @@
                     </li>
                 </ul>
                 <?php if (isset($_SESSION['MaSV'])): ?>
-                <div class="d-flex">
-                    <span class="text-light me-3">Xin chào,
-                        <?php echo htmlspecialchars($_SESSION['HoTen'] ?? ''); ?></span>
-                    <a href="index.php?controller=hocphan&action=logout" class="btn btn-outline-light">Đăng xuất</a>
-                </div>
+                    <div class="d-flex">
+                        <span class="text-light me-3">Xin chào,
+                            <?php echo htmlspecialchars($_SESSION['HoTen'] ?? ''); ?></span>
+                        <a href="index.php?controller=hocphan&action=logout" class="btn btn-outline-light">Đăng xuất</a>
+                    </div>
                 <?php else: ?>
-                <div class="d-flex">
-                    <a href="index.php?controller=hocphan&action=login" class="btn btn-outline-light">Đăng nhập</a>
-                </div>
+                    <div class="d-flex">
+                        <a href="index.php?controller=hocphan&action=login" class="btn btn-outline-light">Đăng nhập</a>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -57,34 +57,34 @@
             </thead>
             <tbody>
                 <?php while ($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($row['MaSV']); ?></td>
-                    <td><?php echo htmlspecialchars($row['HoTen']); ?></td>
-                    <td><?php echo htmlspecialchars($row['GioiTinh']); ?></td>
-                    <td><?php echo htmlspecialchars($row['NgaySinh']); ?></td>
-                    <td>
-                        <?php if ($row['Hinh']): ?>
-                        <?php
-                                $imagePath = "/Project/buoi7-KT/" . htmlspecialchars($row['Hinh']);
+                    <tr>
+                        <td><?php echo htmlspecialchars($row['MaSV']); ?></td>
+                        <td><?php echo htmlspecialchars($row['HoTen']); ?></td>
+                        <td><?php echo htmlspecialchars($row['GioiTinh']); ?></td>
+                        <td><?php echo htmlspecialchars($row['NgaySinh']); ?></td>
+                        <td>
+                            <?php if ($row['Hinh']): ?>
+                                <?php
+                                $imagePath = htmlspecialchars($row['Hinh']);
                                 echo "<!-- Debug: Image path = " . $imagePath . " -->";
                                 ?>
-                        <img src="<?php echo $imagePath; ?>" alt="Hình sinh viên"
-                            style="width: 50px; height: 50px; object-fit: cover;">
-                        <?php else: ?>
-                        <img src="/Project/buoi7-KT/uploads/avatar.jpg" alt="Hình mặc định"
-                            style="width: 50px; height: 50px; object-fit: cover;">
-                        <?php endif; ?>
-                    </td>
-                    <td><?php echo htmlspecialchars($row['TenNganh']); ?></td>
-                    <td>
-                        <a href="index.php?action=show&id=<?php echo $row['MaSV']; ?>" class="btn btn-info btn-sm">Chi
-                            tiết</a>
-                        <a href="index.php?action=edit&id=<?php echo $row['MaSV']; ?>"
-                            class="btn btn-warning btn-sm">Sửa</a>
-                        <a href="index.php?action=delete&id=<?php echo $row['MaSV']; ?>" class="btn btn-danger btn-sm"
-                            onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
-                    </td>
-                </tr>
+                                <img src="<?php echo $imagePath; ?>" alt="Hình sinh viên"
+                                    style="width: 50px; height: 50px; object-fit: cover;">
+                            <?php else: ?>
+                                <img src="uploads/avatar.jpg" alt="Hình mặc định"
+                                    style="width: 50px; height: 50px; object-fit: cover;">
+                            <?php endif; ?>
+                        </td>
+                        <td><?php echo htmlspecialchars($row['TenNganh']); ?></td>
+                        <td>
+                            <a href="index.php?action=show&id=<?php echo $row['MaSV']; ?>" class="btn btn-info btn-sm">Chi
+                                tiết</a>
+                            <a href="index.php?action=edit&id=<?php echo $row['MaSV']; ?>"
+                                class="btn btn-warning btn-sm">Sửa</a>
+                            <a href="index.php?action=delete&id=<?php echo $row['MaSV']; ?>" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
+                        </td>
+                    </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
