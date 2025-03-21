@@ -46,6 +46,7 @@
                     <th>Mã học phần</th>
                     <th>Tên học phần</th>
                     <th>Số tín chỉ</th>
+                    <th>Số lượng dự kiến</th>
                     <th>Thao tác</th>
                 </tr>
             </thead>
@@ -55,6 +56,7 @@
                         <td><?php echo htmlspecialchars($row['MaHP']); ?></td>
                         <td><?php echo htmlspecialchars($row['TenHP']); ?></td>
                         <td><?php echo htmlspecialchars($row['SoTinChi']); ?></td>
+                        <td><?php echo htmlspecialchars($row['SoLuong']); ?></td>
                         <td>
                             <?php if (isset($_SESSION['MaSV'])): ?>
                                 <a href="index.php?controller=hocphan&action=dangKy&id=<?php echo $row['MaHP']; ?>"

@@ -61,77 +61,129 @@ class HocPhan
         }
     }
 
-    // Hủy đăng ký học phần
-    public function huyDangKy($maSV, $maHP)
+    // Lưu thông tin đăng ký học phần
+    public function luuDangKy($maSV, $ngayDK, $danhSachHP)
     {
         try {
-            // Tìm MaDK từ MaSV
-            $queryDangKy = "SELECT dk.MaDK 
-                           FROM DangKy dk 
-                           JOIN ChiTietDangKy ct ON dk.MaDK = ct.MaDK 
-                           WHERE dk.MaSV = ? AND ct.MaHP = ?";
-            $stmtDangKy = $this->conn->prepare($queryDangKy);
-            $stmtDangKy->execute([$maSV, $maHP]);
-            $dangKy = $stmtDangKy->fetch(PDO::FETCH_ASSOC);
+            $this->conn->beginTransaction();
 
-            if ($dangKy) {
-                // Xóa chi tiết đăng ký
-                $queryDelete = "DELETE FROM ChiTietDangKy WHERE MaDK = ? AND MaHP = ?";
-                $stmtDelete = $this->conn->prepare($queryDelete);
-                $stmtDelete->execute([$dangKy['MaDK'], $maHP]);
+            // Thêm vào bảng DangKy
+            $sql = "INSERT INTO DangKy (NgayDK, MaSV) VALUES (?, ?)";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([$ngayDK, $maSV]);
+            $maDK = $this->conn->lastInsertId();
 
-                // Kiểm tra nếu không còn học phần nào thì xóa luôn đăng ký
-                $queryCheck = "SELECT COUNT(*) as count FROM ChiTietDangKy WHERE MaDK = ?";
-                $stmtCheck = $this->conn->prepare($queryCheck);
-                $stmtCheck->execute([$dangKy['MaDK']]);
-                $result = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+            // Thêm vào bảng ChiTietDangKy và cập nhật số lượng
+            $sqlChiTiet = "INSERT INTO ChiTietDangKy (MaDK, MaHP) VALUES (?, ?)";
+            $sqlCapNhat = "UPDATE HocPhan SET SoLuong = SoLuong - 1 WHERE MaHP = ?";
 
-                if ($result['count'] == 0) {
-                    $queryDeleteDK = "DELETE FROM DangKy WHERE MaDK = ?";
-                    $stmtDeleteDK = $this->conn->prepare($queryDeleteDK);
-                    $stmtDeleteDK->execute([$dangKy['MaDK']]);
-                }
+            $stmtChiTiet = $this->conn->prepare($sqlChiTiet);
+            $stmtCapNhat = $this->conn->prepare($sqlCapNhat);
 
-                return true;
+            foreach ($danhSachHP as $maHP) {
+                // Thêm chi tiết đăng ký
+                $stmtChiTiet->execute([$maDK, $maHP]);
+
+                // Cập nhật số lượng
+                $stmtCapNhat->execute([$maHP]);
             }
+
+            $this->conn->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->conn->rollBack();
             return false;
-        } catch (Exception $e) {
-            throw $e;
         }
     }
 
-    // Thêm phương thức mới để hủy tất cả đăng ký
+    // Hủy đăng ký học phần và cập nhật số lượng
+    public function huyDangKy($maSV, $maHP)
+    {
+        try {
+            $this->conn->beginTransaction();
+
+            // Lấy MaDK từ bảng DangKy
+            $sqlMaDK = "SELECT dk.MaDK 
+                       FROM DangKy dk 
+                       WHERE dk.MaSV = ?";
+            $stmtMaDK = $this->conn->prepare($sqlMaDK);
+            $stmtMaDK->execute([$maSV]);
+            $maDK = $stmtMaDK->fetch(PDO::FETCH_COLUMN);
+
+            if ($maDK) {
+                // Xóa từ bảng ChiTietDangKy
+                $sqlXoaChiTiet = "DELETE FROM ChiTietDangKy WHERE MaDK = ? AND MaHP = ?";
+                $stmtXoaChiTiet = $this->conn->prepare($sqlXoaChiTiet);
+                $stmtXoaChiTiet->execute([$maDK, $maHP]);
+
+                // Cập nhật số lượng
+                $sqlCapNhat = "UPDATE HocPhan SET SoLuong = SoLuong + 1 WHERE MaHP = ?";
+                $stmtCapNhat = $this->conn->prepare($sqlCapNhat);
+                $stmtCapNhat->execute([$maHP]);
+
+                // Kiểm tra nếu không còn học phần nào trong đăng ký thì xóa luôn đăng ký
+                $sqlKiemTra = "SELECT COUNT(*) FROM ChiTietDangKy WHERE MaDK = ?";
+                $stmtKiemTra = $this->conn->prepare($sqlKiemTra);
+                $stmtKiemTra->execute([$maDK]);
+                $soLuong = $stmtKiemTra->fetch(PDO::FETCH_COLUMN);
+
+                if ($soLuong == 0) {
+                    $sqlXoaDangKy = "DELETE FROM DangKy WHERE MaDK = ?";
+                    $stmtXoaDangKy = $this->conn->prepare($sqlXoaDangKy);
+                    $stmtXoaDangKy->execute([$maDK]);
+                }
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->conn->rollBack();
+            return false;
+        }
+    }
+
+    // Hủy tất cả đăng ký của sinh viên
     public function huyTatCaDangKy($maSV)
     {
         try {
-            // Bắt đầu transaction
             $this->conn->beginTransaction();
 
-            // Lấy tất cả MaDK của sinh viên
-            $queryDangKy = "SELECT MaDK FROM DangKy WHERE MaSV = ?";
-            $stmtDangKy = $this->conn->prepare($queryDangKy);
-            $stmtDangKy->execute([$maSV]);
-            $danhSachDangKy = $stmtDangKy->fetchAll(PDO::FETCH_ASSOC);
+            // Lấy MaDK và danh sách học phần từ bảng DangKy và ChiTietDangKy
+            $sqlDanhSach = "SELECT dk.MaDK, ct.MaHP 
+                           FROM DangKy dk 
+                           JOIN ChiTietDangKy ct ON dk.MaDK = ct.MaDK 
+                           WHERE dk.MaSV = ?";
+            $stmtDanhSach = $this->conn->prepare($sqlDanhSach);
+            $stmtDanhSach->execute([$maSV]);
+            $danhSach = $stmtDanhSach->fetchAll(PDO::FETCH_ASSOC);
 
-            foreach ($danhSachDangKy as $dangKy) {
-                // Xóa tất cả chi tiết đăng ký
-                $queryDeleteChiTiet = "DELETE FROM ChiTietDangKy WHERE MaDK = ?";
-                $stmtDeleteChiTiet = $this->conn->prepare($queryDeleteChiTiet);
-                $stmtDeleteChiTiet->execute([$dangKy['MaDK']]);
+            if (!empty($danhSach)) {
+                // Cập nhật số lượng cho từng học phần
+                $sqlCapNhat = "UPDATE HocPhan SET SoLuong = SoLuong + 1 WHERE MaHP = ?";
+                $stmtCapNhat = $this->conn->prepare($sqlCapNhat);
 
-                // Xóa đăng ký
-                $queryDeleteDangKy = "DELETE FROM DangKy WHERE MaDK = ?";
-                $stmtDeleteDangKy = $this->conn->prepare($queryDeleteDangKy);
-                $stmtDeleteDangKy->execute([$dangKy['MaDK']]);
+                foreach ($danhSach as $item) {
+                    $stmtCapNhat->execute([$item['MaHP']]);
+                }
+
+                // Xóa từ bảng ChiTietDangKy
+                $sqlXoaChiTiet = "DELETE ct FROM ChiTietDangKy ct 
+                                 JOIN DangKy dk ON ct.MaDK = dk.MaDK 
+                                 WHERE dk.MaSV = ?";
+                $stmtXoaChiTiet = $this->conn->prepare($sqlXoaChiTiet);
+                $stmtXoaChiTiet->execute([$maSV]);
+
+                // Xóa từ bảng DangKy
+                $sqlXoaDangKy = "DELETE FROM DangKy WHERE MaSV = ?";
+                $stmtXoaDangKy = $this->conn->prepare($sqlXoaDangKy);
+                $stmtXoaDangKy->execute([$maSV]);
             }
 
-            // Commit transaction
             $this->conn->commit();
             return true;
-        } catch (Exception $e) {
-            // Rollback nếu có lỗi
+        } catch (PDOException $e) {
             $this->conn->rollBack();
-            throw $e;
+            return false;
         }
     }
 
@@ -158,33 +210,6 @@ class HocPhan
             $stmt->execute($maHPs);
             return $stmt;
         } catch (PDOException $e) {
-            return false;
-        }
-    }
-
-    // Lưu thông tin đăng ký học phần
-    public function luuDangKy($maSV, $ngayDK, $danhSachHP)
-    {
-        try {
-            $this->conn->beginTransaction();
-
-            // Thêm vào bảng DangKy
-            $sql = "INSERT INTO DangKy (NgayDK, MaSV) VALUES (?, ?)";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([$ngayDK, $maSV]);
-            $maDK = $this->conn->lastInsertId();
-
-            // Thêm vào bảng ChiTietDangKy
-            $sql = "INSERT INTO ChiTietDangKy (MaDK, MaHP) VALUES (?, ?)";
-            $stmt = $this->conn->prepare($sql);
-            foreach ($danhSachHP as $maHP) {
-                $stmt->execute([$maDK, $maHP]);
-            }
-
-            $this->conn->commit();
-            return true;
-        } catch (PDOException $e) {
-            $this->conn->rollBack();
             return false;
         }
     }
